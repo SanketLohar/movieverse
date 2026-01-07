@@ -1,8 +1,11 @@
 import { notFound } from "next/navigation";
 import { actors, type Actor } from "../../../lib/actors";
 
-export const runtime = "edge"; 
+export const runtime = "edge";
 export const revalidate = 60;
+
+// ✅ Tag this page for on-demand revalidation
+export const dynamic = "force-static";
 
 type Props = {
   params: Promise<{
