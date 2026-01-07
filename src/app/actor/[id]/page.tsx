@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { actors, type Actor } from "../../../lib/actors";
+import FilmographyExplorer from "../../../components/FilmographyExplorer";
 
 export const runtime = "edge";
 export const revalidate = 60;
@@ -27,15 +28,11 @@ export default async function ActorProfilePage({ params }: Props) {
 
   return (
     <section>
-      <h1>{actor.name}</h1>
-      <p>{actor.bio}</p>
+  <h1>{actor.name}</h1>
+  <p>{actor.bio}</p>
 
-      <h3>Known For</h3>
-      <ul>
-        {actor.knownFor.map((movie) => (
-          <li key={movie}>{movie}</li>
-        ))}
-      </ul>
-    </section>
+  <FilmographyExplorer items={actor.filmography} />
+</section>
+
   );
 }
