@@ -1,12 +1,8 @@
 import { notFound } from "next/navigation";
 import { actors, type Actor } from "../../../lib/actors";
-import FilmographyExplorer from "../../../components/FilmographyExplorer";
 
 export const runtime = "edge";
 export const revalidate = 60;
-
-// ✅ Tag this page for on-demand revalidation
-export const dynamic = "force-static";
 
 type Props = {
   params: Promise<{
@@ -26,13 +22,28 @@ export default async function ActorProfilePage({ params }: Props) {
     return null;
   }
 
+  // ✅ JSON-LD structured data (Person)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: actor.name,
+    description: actor.bio,
+    image: actor.profileImage,
+    knowsFor: actor.filmography.map((f) => f.title),
+  };
+
   return (
     <section>
-  <h1>{actor.name}</h1>
-  <p>{actor.bio}</p>
+      {/* ✅ Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
 
-  <FilmographyExplorer items={actor.filmography} />
-</section>
-
+      <h1>{actor.name}</h1>
+      <p>{actor.bio}</p>
+    </section>
   );
 }
