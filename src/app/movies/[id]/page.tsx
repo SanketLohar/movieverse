@@ -18,9 +18,9 @@ export default function MovieDetailPage({ params }: Props) {
   }
 
   return (
-    <article className="space-y-4">
-      <h1 className="text-3xl font-bold">{movie.title}</h1>
-      <p className="text-gray-600">Release Year: {movie.year}</p>
+    <article>
+      <h1>{movie.title}</h1>
+      <p>Release Year: {movie.year}</p>
       <p>{movie.description}</p>
     </article>
   );
