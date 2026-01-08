@@ -9,6 +9,8 @@ type Props = {
 };
 
 export default function FilmographyExplorer({ items }: Props) {
+  const lang = "en"; // ✅ now correctly placed
+
   const parentRef = useRef<HTMLDivElement>(null);
   const [yearFilter, setYearFilter] = useState<number | "all">("all");
 
@@ -83,7 +85,11 @@ export default function FilmographyExplorer({ items }: Props) {
                   boxSizing: "border-box",
                 }}
               >
-                <strong>{item.title}</strong> ({item.year}) — {item.role}
+                <strong>
+                  {item.title[lang] ?? item.title.en}
+                </strong>{" "}
+                ({item.year}) —{" "}
+                {item.role[lang] ?? item.role.en}
               </div>
             );
           })}

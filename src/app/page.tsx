@@ -16,6 +16,8 @@ export default function HomePage() {
       >
         Browse Movies
       </Link>
+      <Link href="/actor">Browse Actors</Link>
+
     </section>
   );
 }

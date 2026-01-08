@@ -1,14 +1,19 @@
+export type LocalizedText = {
+  en: string;
+  hi?: string;
+};
+
 export type FilmographyItem = {
   id: string;
-  title: string;
+  title: LocalizedText;
   year: number;
-  role: string;
+  role: LocalizedText;
 };
 
 export type Actor = {
   id: string;
-  name: string;
-  bio: string;
+  name: LocalizedText;
+  bio: LocalizedText;
   profileImage: string;
   filmography: FilmographyItem[];
 };
@@ -16,23 +21,28 @@ export type Actor = {
 export const actors: Actor[] = [
   {
     id: "1",
-    name: "Leonardo DiCaprio",
-    bio: "An American actor and film producer known for his work in biographical and period films.",
+    name: {
+      en: "Leonardo DiCaprio",
+      hi: "लियोनार्डो डिकैप्रियो",
+    },
+    bio: {
+      en: "An American actor and film producer known for his work in biographical and period films.",
+      hi: "एक अमेरिकी अभिनेता और फिल्म निर्माता।",
+    },
     profileImage: "https://via.placeholder.com/300x400",
     filmography: [
-      { id: "m1", title: "Inception", year: 2010, role: "Cobb" },
-      { id: "m2", title: "Titanic", year: 1997, role: "Jack Dawson" },
-      { id: "m3", title: "The Revenant", year: 2015, role: "Hugh Glass" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Matthew McConaughey",
-    bio: "An American actor known for his performances in drama and science fiction films.",
-    profileImage: "https://via.placeholder.com/300x400",
-    filmography: [
-      { id: "m4", title: "Interstellar", year: 2014, role: "Cooper" },
-      { id: "m5", title: "Dallas Buyers Club", year: 2013, role: "Ron Woodroof" },
+      {
+        id: "m1",
+        title: { en: "Inception", hi: "इन्सेप्शन" },
+        year: 2010,
+        role: { en: "Cobb", hi: "कॉब" },
+      },
+      {
+        id: "m2",
+        title: { en: "Titanic", hi: "टाइटैनिक" },
+        year: 1997,
+        role: { en: "Jack Dawson", hi: "जैक डॉसन" },
+      },
     ],
   },
 ];
