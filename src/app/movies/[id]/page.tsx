@@ -1,30 +1,45 @@
-export type WatchlistItem = {
-  id: string;
-  title: string;
+import { notFound } from "next/navigation";
+import WatchlistButton from "../../../components/WatchlistButton";
+import { movies, type Movie } from "../../../lib/data";
+
+type Props = {
+  params: Promise<{
+    id: string;
+  }>;
 };
 
-const KEY = "movieverse_watchlist";
+export default async function MovieDetailPage({ params }: Props) {
+  // ✅ unwrap params (REQUIRED in Next.js 16)
+  const { id } = await params;
 
-export function getWatchlist(): WatchlistItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
-  } catch {
-    return [];
+  const movie: Movie | undefined = movies.find(
+    (m) => m.id === id
+  );
+
+  if (!movie) {
+    notFound();
+    return null;
   }
-}
 
-export function isInWatchlist(id: string): boolean {
-  return getWatchlist().some((m) => m.id === id);
-}
+  return (
+    <article className="space-y-4 py-6">
+      <h1 className="text-2xl font-bold">{movie.title}</h1>
 
-export function addToWatchlist(item: WatchlistItem): void {
-  const list = getWatchlist();
-  if (list.some((m) => m.id === item.id)) return;
-  localStorage.setItem(KEY, JSON.stringify([...list, item]));
-}
+      <p className="text-gray-600">
+        Release Year: {movie.year}
+      </p>
 
-export function removeFromWatchlist(id: string): void {
-  const list = getWatchlist().filter((m) => m.id !== id);
-  localStorage.setItem(KEY, JSON.stringify(list));
+      <p className="max-w-xl">
+        {movie.description}
+      </p>
+
+      {/* ✅ Watchlist button */}
+      <WatchlistButton
+        item={{
+          id: movie.id,
+          title: movie.title,
+        }}
+      />
+    </article>
+  );
 }
