@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { actors, type Actor } from "../../../lib/actors";
 import FilmographyExplorer from "../../../components/FilmographyExplorer";
@@ -26,8 +27,8 @@ export default async function ActorProfilePage({ params }: Props) {
   const name = actor.name[lang] ?? actor.name.en;
   const bio = actor.bio[lang] ?? actor.bio.en;
 
-  // ✅ Properly typed JSON-LD (fixes red underline)
-  const jsonLd: Record<string, unknown> = {
+  // JSON-LD (kept minimal & correct)
+  const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name,
@@ -39,7 +40,7 @@ export default async function ActorProfilePage({ params }: Props) {
   };
 
   return (
-    <section className="space-y-8 py-8">
+    <section className="space-y-10 py-8">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -49,19 +50,31 @@ export default async function ActorProfilePage({ params }: Props) {
       />
 
       {/* Actor Header */}
-      <header className="space-y-3">
-        <h1 className="text-2xl sm:text-3xl font-bold">
-          {name}
-        </h1>
-        <p className="text-gray-600 max-w-2xl">
-          {bio}
-        </p>
+      <header className="flex flex-col gap-6 sm:flex-row sm:items-start">
+        {/* ✅ Optimized Actor Image */}
+        <Image
+          src={actor.profileImage}
+          alt={name}
+          width={240}
+          height={320}
+          priority
+          className="rounded-lg object-cover shadow-md"
+        />
+
+        {/* Actor Info */}
+        <div className="space-y-3">
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {name}
+          </h1>
+
+          <p className="text-gray-600 max-w-2xl">
+            {bio}
+          </p>
+        </div>
       </header>
 
       {/* Filmography */}
-      <div>
-        <FilmographyExplorer items={actor.filmography} />
-      </div>
+      <FilmographyExplorer items={actor.filmography} />
     </section>
   );
 }

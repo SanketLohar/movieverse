@@ -8,6 +8,7 @@ export type FilmographyItem = {
   title: LocalizedText;
   year: number;
   role: LocalizedText;
+  genre: string[];
 };
 
 export type Actor = {
@@ -29,20 +30,23 @@ export const actors: Actor[] = [
       en: "An American actor and film producer known for his work in biographical and period films.",
       hi: "एक अमेरिकी अभिनेता और फिल्म निर्माता।",
     },
-    profileImage: "https://via.placeholder.com/300x400",
+    profileImage: "/actors/leonardo.jpg", // ✅ LOCAL IMAGE
     filmography: [
-      {
-        id: "m1",
-        title: { en: "Inception", hi: "इन्सेप्शन" },
-        year: 2010,
-        role: { en: "Cobb", hi: "कॉब" },
-      },
-      {
-        id: "m2",
-        title: { en: "Titanic", hi: "टाइटैनिक" },
-        year: 1997,
-        role: { en: "Jack Dawson", hi: "जैक डॉसन" },
-      },
-    ],
+  {
+    id: "m1",
+    title: { en: "Inception", hi: "इन्सेप्शन" },
+    year: 2010,
+    role: { en: "Cobb", hi: "कॉब" },
+    genre: ["Sci-Fi", "Thriller"],
+  },
+  {
+    id: "m2",
+    title: { en: "Titanic", hi: "टाइटैनिक" },
+    year: 1997,
+    role: { en: "Jack Dawson", hi: "जैक डॉसन" },
+    genre: ["Romance", "Drama"],
+  },
+],
+
   },
 ];

@@ -1,27 +1,23 @@
-type Props = {
-  children: React.ReactNode;
-  awards: React.ReactNode;
-  social: React.ReactNode;
-  similar: React.ReactNode;
-};
-
 export default function ActorLayout({
   children,
   awards,
   social,
   similar,
-}: Props) {
+}: {
+  children: React.ReactNode;
+  awards: React.ReactNode;
+  social: React.ReactNode;
+  similar: React.ReactNode;
+}) {
   return (
-    <section>
+    <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
       <div>{children}</div>
 
-      <hr />
-
-      <div style={{ display: "flex", gap: "16px" }}>
-        <div style={{ flex: 1 }}>{awards}</div>
-        <div style={{ flex: 1 }}>{social}</div>
-        <div style={{ flex: 1 }}>{similar}</div>
-      </div>
-    </section>
+      <aside className="space-y-6">
+        {awards}
+        {social}
+        {similar}
+      </aside>
+    </div>
   );
 }
