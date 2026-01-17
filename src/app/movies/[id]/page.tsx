@@ -1,44 +1,31 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import { movies } from "../../../lib/data";
 
-import FilmographyExplorer from "../../../components/FilmographyExplorer";
-import { getActorById } from "../../../lib/data-source/actor.repo";
+type Props = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
-export const runtime = "edge";
-export const revalidate = 60;
+export default async function MovieDetailPage({ params }: Props) {
+  // ✅ REQUIRED in Next.js 16
+  const { id } = await params;
 
-export default async function ActorProfilePage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const actor = await getActorById(params.id);
+  const movie = movies.find((m) => m.id === id);
 
-  if (!actor) {
+  if (!movie) {
     notFound();
   }
 
   return (
-    <section className="space-y-6 py-6">
-      <div className="flex gap-6 items-start">
-        <Image
-          src={actor.profileImage}
-          alt={actor.name.en}
-          width={220}
-          height={300}
-          priority
-          className="rounded-lg object-cover"
-        />
+    <section className="space-y-4 py-8">
+      <h1 className="text-3xl font-bold">{movie.title}</h1>
 
-        <div>
-          <h1 className="text-3xl font-bold">{actor.name.en}</h1>
-          <p className="mt-2 max-w-xl text-gray-600">
-            {actor.bio.en}
-          </p>
-        </div>
-      </div>
+      <p className="text-gray-600">
+        Release Year: {movie.year}
+      </p>
 
-      <FilmographyExplorer items={actor.filmography} />
+      <p className="max-w-2xl">{movie.description}</p>
     </section>
   );
 }

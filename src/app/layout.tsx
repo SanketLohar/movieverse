@@ -1,6 +1,13 @@
-import "../app/globals.css";
+import "./globals.css";
 import Header from "../components/Header";
 import WatchlistHydrator from "../components/WatchlistHydrator";
+import PageTransition from "../components/PageTransition";
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default function RootLayout({
   children,
@@ -10,15 +17,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* Client-side IndexedDB → LocalStorage hydration */}
+        {/* Client-side hydration */}
         <WatchlistHydrator />
 
-        {/* Global navigation */}
+        {/* Global header */}
         <Header />
 
-        {/* Page content */}
+        {/* Page transition wrapper */}
         <main className="mx-auto max-w-6xl p-4">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </main>
       </body>
     </html>

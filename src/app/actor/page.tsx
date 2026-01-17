@@ -9,7 +9,6 @@ export default function ActorsPage() {
 
   return (
     <section className="space-y-6 py-8">
-      {/* Page heading */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           Actors
@@ -19,7 +18,6 @@ export default function ActorsPage() {
         </p>
       </div>
 
-      {/* Actors list */}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {actors.map((actor) => (
           <li
@@ -28,6 +26,7 @@ export default function ActorsPage() {
           >
             <Link
               href={`/actor/${actor.id}`}
+              prefetch
               className="block font-medium text-purple-600 hover:underline"
             >
               {actor.name[lang] ?? actor.name.en}

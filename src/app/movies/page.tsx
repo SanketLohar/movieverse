@@ -16,6 +16,7 @@ export default function MoviesPage() {
 
             <Link
               href={`/movies/${movie.id}`}
+              prefetch
               className="mt-2 inline-block text-blue-600 hover:underline"
             >
               View Details →

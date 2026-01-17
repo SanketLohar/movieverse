@@ -1,7 +1,9 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { actors, type Actor } from "../../../lib/actors";
-import FilmographyExplorer from "../../../components/FilmographyExplorer";
+import type { Metadata } from "next";
+import { getActorById } from "../../../data/actors/actor.repository";
+import FilmographyClient from "../../../components/FilmographyClient";
+import { buildPersonJsonLd } from "../../../lib/seo/person.schema";
 
 export const runtime = "edge";
 export const revalidate = 60;
@@ -12,36 +14,40 @@ type Props = {
   }>;
 };
 
-export default async function ActorProfilePage({ params }: Props) {
+/* ---------- SEO METADATA ---------- */
+
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const { id } = await params;
+  const actor = await getActorById(id);
+
+  if (!actor) {
+    return { title: "Actor not found | MovieVerse" };
+  }
+
+  return {
+    title: `${actor.name.en} | MovieVerse`,
+    description: actor.bio.en.slice(0, 160),
+  };
+}
+
+/* ---------- PAGE ---------- */
+
+export default async function ActorPage({ params }: Props) {
   const { id } = await params;
 
-  const actor: Actor | undefined = actors.find(
-    (a) => a.id === id
-  );
+  const actor = await getActorById(id);
 
   if (!actor) {
     notFound();
   }
 
-  const lang = "en";
-  const name = actor.name[lang] ?? actor.name.en;
-  const bio = actor.bio[lang] ?? actor.bio.en;
-
-  // JSON-LD (kept minimal & correct)
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name,
-    description: bio,
-    image: actor.profileImage,
-    knowsFor: actor.filmography.map(
-      (f) => f.title[lang] ?? f.title.en
-    ),
-  };
+  const jsonLd = buildPersonJsonLd(actor);
 
   return (
     <section className="space-y-10 py-8">
-      {/* Structured Data */}
+      {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -49,32 +55,28 @@ export default async function ActorProfilePage({ params }: Props) {
         }}
       />
 
-      {/* Actor Header */}
-      <header className="flex flex-col gap-6 sm:flex-row sm:items-start">
-        {/* ✅ Optimized Actor Image */}
+      <header className="flex flex-col gap-6 sm:flex-row">
         <Image
           src={actor.profileImage}
-          alt={name}
+          alt={actor.name.en}
           width={240}
           height={320}
           priority
-          className="rounded-lg object-cover shadow-md"
+          className="rounded-lg object-cover"
         />
 
-        {/* Actor Info */}
         <div className="space-y-3">
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            {name}
+          <h1 className="text-2xl font-bold">
+            {actor.name.en}
           </h1>
 
-          <p className="text-gray-600 max-w-2xl">
-            {bio}
+          <p className="text-gray-600">
+            {actor.bio.en}
           </p>
         </div>
       </header>
 
-      {/* Filmography */}
-      <FilmographyExplorer items={actor.filmography} />
+      <FilmographyClient items={actor.filmography} />
     </section>
   );
 }

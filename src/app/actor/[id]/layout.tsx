@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 export default function ActorLayout({
   children,
   awards,
@@ -10,14 +12,18 @@ export default function ActorLayout({
   similar: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
-      <div>{children}</div>
+    <section className="mx-auto max-w-7xl px-4 py-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-8 min-w-0">
+          {children}
+        </div>
 
-      <aside className="space-y-6">
-        {awards}
-        {social}
-        {similar}
-      </aside>
-    </div>
+        <aside className="lg:col-span-4 space-y-6">
+          <Suspense fallback={<div>Loading…</div>}>{awards}</Suspense>
+          <Suspense fallback={<div>Loading…</div>}>{social}</Suspense>
+          <Suspense fallback={<div>Loading…</div>}>{similar}</Suspense>
+        </aside>
+      </div>
+    </section>
   );
 }
