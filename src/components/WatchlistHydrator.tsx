@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { hydrateFromDB } from "../lib/watchlist";
+import { watchlistService } from "../data/watchlist/watchlist.service";
 
 export default function WatchlistHydrator() {
   useEffect(() => {
-    hydrateFromDB();
+    watchlistService.init();
   }, []);
 
-  return null; // no UI
+  return null;
 }

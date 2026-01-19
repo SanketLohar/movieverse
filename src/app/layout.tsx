@@ -1,13 +1,7 @@
 import "./globals.css";
 import Header from "../components/Header";
 import WatchlistHydrator from "../components/WatchlistHydrator";
-import PageTransition from "../components/PageTransition";
-import type { Viewport } from "next";
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-};
+import { WatchlistUndoProvider } from "../components/WatchlistUndoProvider";
 
 export default function RootLayout({
   children,
@@ -17,18 +11,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* Client-side hydration */}
+        {/* Hydrate IndexedDB → memory */}
         <WatchlistHydrator />
 
-        {/* Global header */}
-        <Header />
+        {/* Undo system MUST wrap toggles */}
+        <WatchlistUndoProvider>
+          <Header />
 
-        {/* Page transition wrapper */}
-        <main className="mx-auto max-w-6xl p-4">
-          <PageTransition>
+          <main className="mx-auto max-w-6xl p-4">
             {children}
-          </PageTransition>
-        </main>
+          </main>
+        </WatchlistUndoProvider>
       </body>
     </html>
   );

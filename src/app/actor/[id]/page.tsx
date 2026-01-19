@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getActorById } from "../../../data/actors/actor.repository";
 import FilmographyClient from "../../../components/FilmographyClient";
+import WatchlistToggle from "../../../components/WatchlistToggle";
 import { buildPersonJsonLd } from "../../../lib/seo/person.schema";
 
 export const runtime = "edge";
@@ -14,7 +15,7 @@ type Props = {
   }>;
 };
 
-/* ---------- SEO METADATA ---------- */
+/* ---------- SEO ---------- */
 
 export async function generateMetadata(
   { params }: Props
@@ -36,18 +37,15 @@ export async function generateMetadata(
 
 export default async function ActorPage({ params }: Props) {
   const { id } = await params;
-
   const actor = await getActorById(id);
 
-  if (!actor) {
-    notFound();
-  }
+  if (!actor) notFound();
 
   const jsonLd = buildPersonJsonLd(actor);
 
   return (
     <section className="space-y-10 py-8">
-      {/* JSON-LD structured data */}
+      {/* JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -65,12 +63,20 @@ export default async function ActorPage({ params }: Props) {
           className="rounded-lg object-cover"
         />
 
-        <div className="space-y-3">
-          <h1 className="text-2xl font-bold">
-            {actor.name.en}
-          </h1>
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">
+              {actor.name.en}
+            </h1>
 
-          <p className="text-gray-600">
+            {/* ✅ CORRECT PLACE */}
+            <WatchlistToggle
+              id={actor.id}
+              type="actor"
+            />
+          </div>
+
+          <p className="text-gray-600 max-w-2xl">
             {actor.bio.en}
           </p>
         </div>
