@@ -3,6 +3,7 @@ import type { WatchlistItem } from "./watchlist.schema";
 import { watchlistChannel } from "./watchlist.channel";
 
 type Listener = () => void;
+type MutationSource = "local" | "remote";
 
 class WatchlistService {
   private repo = new IndexedDBWatchlistRepository();
@@ -29,18 +30,21 @@ class WatchlistService {
       const msg = e.data;
 
       if (msg.type === "upsert") {
-        this.applyIncoming(msg.item);
+        this.applyIncoming(msg.item, "remote");
       }
 
       if (msg.type === "remove") {
-        this.applyIncoming({
-          id: msg.id,
-          deleted: true,
-          updatedAt: Date.now(),
-          version: Number.MAX_SAFE_INTEGER,
-          addedAt: 0,
-          type: "movie",
-        });
+        this.applyIncoming(
+          {
+            id: msg.id,
+            type: "movie",
+            addedAt: 0,
+            updatedAt: Date.now(),
+            deleted: true,
+            version: Number.MAX_SAFE_INTEGER,
+          },
+          "remote"
+        );
       }
     });
   }
@@ -51,34 +55,37 @@ class WatchlistService {
     return this.ready;
   }
 
-  getAll(): WatchlistItem[] {
+  getAll() {
     return Array.from(this.cache.values());
   }
 
-  has(id: string): boolean {
+  has(id: string) {
     return this.cache.has(id);
   }
 
   /* ---------------- subscriptions ---------------- */
 
-  subscribe(fn: Listener) {
-  this.listeners.add(fn);
-  return () => {
-    this.listeners.delete(fn);
-  };
-}
-
+  subscribe(fn: Listener): () => void {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
 
   private emit() {
     this.listeners.forEach((fn) => fn());
+  }
+
+  forceEmit() {
+    this.emit();
   }
 
   /* ---------------- conflict resolution ---------------- */
 
   private shouldApply(
     incoming: WatchlistItem,
-    existing?: WatchlistItem
+    existing?: WatchlistItem,
+    source: MutationSource = "remote"
   ) {
+    if (source === "local") return true;
     if (!existing) return true;
     return incoming.updatedAt > existing.updatedAt;
   }
@@ -106,7 +113,7 @@ class WatchlistService {
 
     const existing = this.cache.get(id);
 
-    if (this.shouldApply(incoming, existing)) {
+    if (this.shouldApply(incoming, existing, "local")) {
       this.cache.set(id, incoming);
       this.emit();
       this.broadcast(incoming);
@@ -132,7 +139,7 @@ class WatchlistService {
       version: existing.version + 1,
     };
 
-    if (this.shouldApply(incoming, existing)) {
+    if (this.shouldApply(incoming, existing, "local")) {
       this.cache.delete(id);
       this.emit();
       this.broadcast(incoming);
@@ -146,18 +153,13 @@ class WatchlistService {
     }
   }
 
-  /* ---------------- cross-tab apply ---------------- */
-
-  private applyIncoming(item: WatchlistItem) {
+  private applyIncoming(item: WatchlistItem, source: MutationSource) {
     const existing = this.cache.get(item.id);
 
-    if (!this.shouldApply(item, existing)) return;
+    if (!this.shouldApply(item, existing, source)) return;
 
-    if (item.deleted) {
-      this.cache.delete(item.id);
-    } else {
-      this.cache.set(item.id, item);
-    }
+    if (item.deleted) this.cache.delete(item.id);
+    else this.cache.set(item.id, item);
 
     this.emit();
   }

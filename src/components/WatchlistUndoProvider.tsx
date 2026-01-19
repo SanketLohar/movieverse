@@ -6,6 +6,11 @@ import {
   useState,
   ReactNode,
 } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "framer-motion";
 
 type UndoPayload = {
   label: string;
@@ -24,42 +29,70 @@ export function WatchlistUndoProvider({
 }: {
   children: ReactNode;
 }) {
-  const [undo, setUndo] =
+  const reduceMotion = useReducedMotion();
+
+  // ✅ SINGLE undo state
+  const [toast, setToast] =
     useState<UndoPayload | null>(null);
 
   function show(payload: UndoPayload) {
-    setUndo(payload);
+    setToast(payload);
 
-    // auto-dismiss after 4s
+    // auto-dismiss
     setTimeout(() => {
-      setUndo(null);
+      setToast(null);
     }, 4000);
-  }
-
-  function handleUndo() {
-    undo?.onUndo();
-    setUndo(null);
   }
 
   return (
     <UndoContext.Provider value={{ show }}>
       {children}
 
-      {/* Toast UI */}
-      {undo && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-lg border bg-white px-4 py-2 shadow-lg">
-          <span className="text-sm">
-            {undo.label}
-          </span>
+      {/* ✅ Single undo toast */}
+      <div
+        className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              key="undo-toast"
+              initial={
+                reduceMotion
+                  ? false
+                  : { opacity: 0, y: 24 }
+              }
+              animate={{ opacity: 1, y: 0 }}
+              exit={
+                reduceMotion
+                  ? { opacity: 0 }
+                  : { opacity: 0, y: 24 }
+              }
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 35,
+              }}
+              className="flex items-center gap-4 rounded-lg border bg-white px-4 py-2 shadow-lg"
+            >
+              <span className="text-sm">
+                {toast.label}
+              </span>
 
-          <button
-            onClick={handleUndo}
-            className="text-sm font-semibold text-blue-600"
-          >
-            Undo
-          </button>
-        </div>
-      )}
+              <button
+                onClick={() => {
+                  toast.onUndo();
+                  setToast(null);
+                }}
+                className="text-sm font-semibold text-blue-600"
+              >
+                Undo
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </UndoContext.Provider>
   );
 }

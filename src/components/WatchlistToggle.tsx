@@ -38,24 +38,29 @@ export default function WatchlistToggle({ id, type }: Props) {
   /* ---------------- TOGGLE ---------------- */
 
   async function toggle() {
-    if (active) {
-      await watchlistService.remove(id);
+  if (active) {
+    await watchlistService.remove(id);
 
-      undo.show({
-        label: "Removed from watchlist",
-        onUndo: () =>
-          watchlistService.add(id, type),
-      });
-    } else {
-      await watchlistService.add(id, type);
+    undo.show({
+      label: "Removed from watchlist",
+      onUndo: () => {
+        watchlistService.add(id, type);
+        watchlistService.forceEmit();
+      },
+    });
+  } else {
+    await watchlistService.add(id, type);
 
-      undo.show({
-        label: "Added to watchlist",
-        onUndo: () =>
-          watchlistService.remove(id),
-      });
-    }
+    undo.show({
+      label: "Added to watchlist",
+      onUndo: () => {
+        watchlistService.remove(id);
+        watchlistService.forceEmit();
+      },
+    });
   }
+}
+
 
   /* ---------------- LOADING ---------------- */
 
@@ -74,28 +79,32 @@ export default function WatchlistToggle({ id, type }: Props) {
 
   return (
     <motion.button
-      onClick={toggle}
-      aria-pressed={active}
-      whileTap={
-        reduceMotion ? undefined : { scale: 0.92 }
-      }
-      whileHover={
-        reduceMotion ? undefined : { scale: 1.05 }
-      }
-      transition={{
-        type: "spring",
-        stiffness: 420,
-        damping: 22,
-      }}
-      className={`rounded border px-3 py-1 text-sm font-medium
-        ${
-          active
-            ? "bg-yellow-200 border-yellow-400 text-yellow-900"
-            : "bg-white border-gray-300 hover:bg-gray-50"
-        }
-      `}
-    >
-      {active ? "★ In Watchlist" : "☆ Add to Watchlist"}
-    </motion.button>
+  onClick={toggle}
+  aria-pressed={active}
+  data-state={active ? "active" : "inactive"}
+  whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+  whileHover={reduceMotion ? undefined : { scale: 1.05 }}
+  transition={{
+    type: "spring",
+    stiffness: 420,
+    damping: 22,
+  }}
+  className={`rounded border px-3 py-1 text-sm font-medium
+    ${
+      active
+        ? "bg-yellow-200 border-yellow-400 text-yellow-900"
+        : "bg-white border-gray-300 hover:bg-gray-50"
+    }
+  `}
+>
+  {/* visible UI */}
+  {active ? "★ In Watchlist" : "☆ Add to Watchlist"}
+
+  {/* hidden deterministic label for tests */}
+  <span className="sr-only">
+    {active ? "In Watchlist" : "Add to Watchlist"}
+  </span>
+</motion.button>
+
   );
 }

@@ -9,16 +9,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="antialiased">
+      <body className="flex min-h-screen flex-col bg-white text-gray-900">
         {/* Hydrate IndexedDB → memory */}
         <WatchlistHydrator />
 
         {/* Undo system MUST wrap toggles */}
         <WatchlistUndoProvider>
           <Header />
-
-          <main className="mx-auto max-w-6xl p-4">
+          
+          {/* REMOVED: max-w-6xl mx-auto
+             WHY: The page.tsx now handles the container. 
+             This prevents the "double margin" issue that made your page small.
+          */}
+          <main className="flex-1">
             {children}
           </main>
         </WatchlistUndoProvider>

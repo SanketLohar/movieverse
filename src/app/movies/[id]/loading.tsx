@@ -1,4 +1,4 @@
-export default function MovieLoading() {
+export default function Loading() {
   return (
     <section className="space-y-6 py-8 animate-pulse">
       <div className="h-8 w-1/2 bg-gray-200 rounded" />
