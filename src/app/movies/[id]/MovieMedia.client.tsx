@@ -1,22 +1,69 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+} from "framer-motion";
+import MediaErrorBoundary from "./MediaErrorBoundary.client";
 
 type Props = {
   trailerYoutubeId: string;
   images: string[];
 };
 
+type Tab = "trailer" | "images";
+
 export default function MovieMedia({
   trailerYoutubeId,
   images,
 }: Props) {
-  const [mode, setMode] = useState<"trailer" | "images">("images");
+  const [mode, setMode] = useState<Tab>("images");
   const prefersReducedMotion = useReducedMotion();
 
+  const trailerRef = useRef<HTMLButtonElement>(null);
+  const imagesRef = useRef<HTMLButtonElement>(null);
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+
   // =====================================
-  // Phase 3.4.2 — Hover image prefetch
+  // Screen reader announcement
+  // =====================================
+  useEffect(() => {
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent =
+        mode === "trailer"
+          ? "Trailer tab selected"
+          : "Images tab selected";
+    }
+  }, [mode]);
+
+  // =====================================
+  // Arrow key navigation (ARIA tabs)
+  // =====================================
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    current: Tab
+  ) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+
+    e.preventDefault();
+
+    const next = current === "trailer" ? "images" : "trailer";
+
+    setMode(next);
+
+    requestAnimationFrame(() => {
+      if (next === "trailer") {
+        trailerRef.current?.focus();
+      } else {
+        imagesRef.current?.focus();
+      }
+    });
+  };
+
+  // =====================================
+  // Image hover prefetch
   // =====================================
   const prefetchImage = (src: string) => {
     const img = new Image();
@@ -25,71 +72,124 @@ export default function MovieMedia({
 
   return (
     <section className="space-y-4">
+      {/* Screen reader live region */}
+      <div
+        ref={liveRegionRef}
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      />
+
       {/* ===============================
           Tabs
       =============================== */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setMode("trailer")}
-          className={`rounded border px-3 py-1 text-sm transition ${
-            mode === "trailer"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          Trailer
-        </button>
+      <div
+  role="tablist"
+  aria-label="Movie media"
+  tabIndex={0}
+  className="flex gap-2"
+  onKeyDown={(e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
 
-        <button
-          onClick={() => setMode("images")}
-          className={`rounded border px-3 py-1 text-sm transition ${
-            mode === "images"
-              ? "bg-black text-white"
-              : "bg-white"
-          }`}
-        >
-          Images
-        </button>
-      </div>
+    e.preventDefault();
+
+    setMode((prev) =>
+      prev === "trailer" ? "images" : "trailer"
+    );
+  }}
+>
+  <button
+    role="tab"
+    aria-selected={mode === "trailer"}
+    tabIndex={-1}
+    onClick={() => setMode("trailer")}
+    className={`rounded border px-3 py-1 text-sm ${
+      mode === "trailer"
+        ? "bg-black text-white"
+        : "bg-white"
+    }`}
+  >
+    Official Trailer
+  </button>
+
+  <button
+    role="tab"
+    aria-selected={mode === "images"}
+    tabIndex={-1}
+    onClick={() => setMode("images")}
+    className={`rounded border px-3 py-1 text-sm ${
+      mode === "images"
+        ? "bg-black text-white"
+        : "bg-white"
+    }`}
+  >
+    Photos
+  </button>
+</div>
+
 
       {/* ===============================
-          Media Area
+          Media Panel
       =============================== */}
       <AnimatePresence mode="wait">
         {mode === "trailer" ? (
           <motion.div
             key="trailer"
+            role="tabpanel"
+            aria-labelledby="trailer"
             initial={
-              prefersReducedMotion ? false : { opacity: 0, y: 10 }
+              prefersReducedMotion
+                ? false
+                : { opacity: 0, y: 10 }
             }
             animate={
-              prefersReducedMotion ? {} : { opacity: 1, y: 0 }
+              prefersReducedMotion
+                ? {}
+                : { opacity: 1, y: 0 }
             }
             exit={
-              prefersReducedMotion ? {} : { opacity: 0, y: -10 }
+              prefersReducedMotion
+                ? {}
+                : { opacity: 0, y: -10 }
             }
             transition={{ duration: 0.25 }}
             className="aspect-video w-full overflow-hidden rounded-lg bg-black"
           >
-            <iframe
-              src={`https://www.youtube.com/embed/${trailerYoutubeId}`}
-              title="Movie trailer"
-              className="h-full w-full"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-            />
+            <MediaErrorBoundary
+              fallback={
+                <div className="flex h-full items-center justify-center rounded-lg bg-gray-100 text-sm text-gray-500">
+                  Trailer unavailable
+                </div>
+              }
+            >
+              <iframe
+                src={`https://www.youtube.com/embed/${trailerYoutubeId}`}
+                title="Movie trailer"
+                className="h-full w-full"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+            </MediaErrorBoundary>
           </motion.div>
         ) : (
           <motion.div
             key="images"
+            role="tabpanel"
+            aria-labelledby="images"
             initial={
-              prefersReducedMotion ? false : { opacity: 0, y: 10 }
+              prefersReducedMotion
+                ? false
+                : { opacity: 0, y: 10 }
             }
             animate={
-              prefersReducedMotion ? {} : { opacity: 1, y: 0 }
+              prefersReducedMotion
+                ? {}
+                : { opacity: 1, y: 0 }
             }
             exit={
-              prefersReducedMotion ? {} : { opacity: 0, y: -10 }
+              prefersReducedMotion
+                ? {}
+                : { opacity: 0, y: -10 }
             }
             transition={{ duration: 0.25 }}
             className="flex gap-3 overflow-x-auto"
@@ -98,7 +198,7 @@ export default function MovieMedia({
               <img
                 key={src}
                 src={src}
-                alt="Movie still"
+                alt={`Movie still ${index + 1}`}
                 className="h-48 rounded-lg object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding="async"
