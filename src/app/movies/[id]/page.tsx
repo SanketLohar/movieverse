@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { Suspense } from "react";
+
 import { getMovieById } from "../../../data/movies/movie.repository";
 import MovieCore from "./MovieCore";
 import MovieDescription from "./MovieDescription";
@@ -8,62 +10,120 @@ import MovieMediaSwitcher from "./MovieMediaSwitcher.client";
 export const runtime = "edge";
 export const revalidate = 60;
 
+/* ---------------------------------------
+   Phase 5.1–5.3 Metadata
+---------------------------------------- */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const movie = await getMovieById(id);
+
+  if (!movie) {
+    return {
+      title: "Movie not found | MovieVerse",
+    };
+  }
+
+  const url = `https://movieverse.com/movies/${movie.id}`;
+
+  return {
+    title: `${movie.title} (${movie.year}) | MovieVerse`,
+    description: movie.description,
+
+    alternates: {
+      canonical: url,
+    },
+
+    openGraph: {
+      title: `${movie.title} (${movie.year})`,
+      description: movie.description,
+      url,
+      siteName: "MovieVerse",
+      type: "video.movie",
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: `${movie.title} (${movie.year})`,
+      description: movie.description,
+    },
+  };
+}
+
+/* ---------------------------------------
+   Page with JSON-LD
+---------------------------------------- */
+
 export default async function MoviePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const movie = await getMovieById(id);
 
   if (!movie) notFound();
 
+  const canonicalUrl = `https://movieverse.com/movies/${movie.id}`;
+
+  // ✅ Phase 5.4 — JSON-LD schema
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    name: movie.title,
+    description: movie.description,
+    datePublished: String(movie.year),
+    url: canonicalUrl,
+    trailer: {
+      "@type": "VideoObject",
+      name: `${movie.title} Official Trailer`,
+      embedUrl: `https://www.youtube.com/embed/${movie.media.trailer}`,
+    },
+  };
+
   return (
-    <main className="min-h-screen bg-white font-sans text-gray-900">
-      {/* Page container */}
-      <div className="container mx-auto max-w-5xl px-4 py-12 md:px-6 lg:py-16">
-        <div className="grid gap-12 lg:grid-cols-[1fr_350px] lg:gap-16">
-          {/* ===============================
-              MAIN CONTENT COLUMN
-          =============================== */}
+    <main className="min-h-screen bg-white text-gray-900">
+      {/* JSON-LD injected server-side */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
+
+      <div className="container mx-auto max-w-5xl px-4 py-12">
+        <div className="grid gap-12 lg:grid-cols-[1fr_350px]">
+          {/* Main column */}
           <div className="space-y-14">
-            {/* Movie identity block */}
-            <section className="space-y-4">
-              <MovieCore movie={movie} />
-            </section>
+            <MovieCore movie={movie} />
 
-            {/* Media surface */}
-            <section
-              aria-label="Media Gallery"
-              className="rounded-2xl border border-gray-200 bg-gray-50 p-6"
+            <MovieMediaSwitcher
+              title={movie.title}
+              trailerId={movie.media.trailer}
+              images={movie.media.stills}
+            />
+
+            <Suspense
+              fallback={
+                <div className="h-24 rounded bg-gray-100" />
+              }
             >
-              <MovieMediaSwitcher
-                title={movie.title}
-                trailerId={movie.media.trailer}
-                images={movie.media.stills}
-              />
-            </section>
-
-            {/* Description */}
-            <section className="prose max-w-none">
-              <Suspense
-                fallback={
-                  <div className="h-24 animate-pulse rounded-lg bg-gray-100" />
-                }
-              >
-                <MovieDescription description={movie.description} />
-              </Suspense>
-            </section>
+              <MovieDescription description={movie.description} />
+            </Suspense>
           </div>
 
-          {/* ===============================
-              SIDEBAR (PHASE 4 RESERVED)
-          =============================== */}
+          {/* Sidebar */}
           <aside className="hidden lg:block">
-            <div className="sticky top-8 h-96 w-full rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-400">
+            <div className="sticky top-8 h-96 rounded-xl border border-dashed bg-gray-50 p-8 text-center text-sm text-gray-400">
               Sidebar Area
               <br />
-              (Reserved for Phase 4)
+              (Phase 6)
             </div>
           </aside>
         </div>

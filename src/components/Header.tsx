@@ -14,6 +14,9 @@ export default function Header() {
         <Link href="/actor">Actors</Link>
         <Link href="/watchlist">Watchlist</Link>
       </div>
+      
     </header>
+    
   );
+  
 }

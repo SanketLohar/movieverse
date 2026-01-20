@@ -1,14 +1,37 @@
-export default function Loading() {
+export default function LoadingMoviePage() {
   return (
-    <section className="space-y-6 py-8 animate-pulse">
-      <div className="h-8 w-1/2 bg-gray-200 rounded" />
-      <div className="h-4 w-32 bg-gray-200 rounded" />
+    <main className="min-h-screen bg-white text-gray-900">
+      <div className="container mx-auto max-w-5xl px-4 py-12">
+        <div className="grid gap-12 lg:grid-cols-[1fr_350px]">
 
-      <div className="space-y-3 max-w-2xl">
-        <div className="h-4 bg-gray-200 rounded" />
-        <div className="h-4 bg-gray-200 rounded w-5/6" />
-        <div className="h-4 bg-gray-200 rounded w-2/3" />
+          {/* Main column */}
+          <div className="space-y-14">
+
+            {/* Title */}
+            <div className="space-y-3">
+              <div className="h-8 w-64 animate-pulse rounded bg-gray-200" />
+              <div className="h-4 w-32 animate-pulse rounded bg-gray-100" />
+            </div>
+
+            {/* Media */}
+            <div className="aspect-video w-full animate-pulse rounded-xl bg-gray-200" />
+
+            {/* Description */}
+            <div className="space-y-3">
+              <div className="h-4 w-full animate-pulse rounded bg-gray-100" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-gray-100" />
+              <div className="h-4 w-4/6 animate-pulse rounded bg-gray-100" />
+            </div>
+
+          </div>
+
+          {/* Sidebar */}
+          <aside className="hidden lg:block">
+            <div className="h-96 animate-pulse rounded-xl bg-gray-100" />
+          </aside>
+
+        </div>
       </div>
-    </section>
+    </main>
   );
 }

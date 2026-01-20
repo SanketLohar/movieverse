@@ -6,7 +6,7 @@ export const moviesMock: Movie[] = [
     title: "Inception",
     year: 2010,
     description:
-      "A thief who steals corporate secrets through dream-sharing technology.",
+      "A thief who steals corporate secrets",
     media: {
       trailer: "YoHD9XEInc0",
       stills: [
