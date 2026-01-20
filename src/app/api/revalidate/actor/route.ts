@@ -11,10 +11,32 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  revalidateTag("actor");
+  let body: { actorId?: string };
+
+  try {
+    body = await req.json();
+  } catch {
+    body = {};
+  }
+
+  const actorId = body.actorId;
+
+  if (!actorId) {
+    return NextResponse.json(
+      { message: "actorId is required" },
+      { status: 400 }
+    );
+  }
+
+  // 🔁 Revalidate single actor page
+  revalidateTag(`actor-${actorId}`);
+
+  // 🔁 Revalidate actor listings
+  revalidateTag("actors");
 
   return NextResponse.json({
     revalidated: true,
-    now: Date.now()
+    actorId,
+    timestamp: Date.now(),
   });
 }

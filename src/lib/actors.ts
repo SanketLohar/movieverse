@@ -27,9 +27,9 @@ export const actors: Actor[] = [
       hi: "लियोनार्डो डिकैप्रियो",
     },
     bio: {
-      en: "An American actor and film producer known for his work in biographical and period films.",
-      hi: "एक अमेरिकी अभिनेता और फिल्म निर्माता।",
-    },
+  en: "UPDATED FROM SERVER AT " + Date.now(),
+},
+
     profileImage: "/actors/leonardo.jpg", // ✅ LOCAL IMAGE
     filmography: [
   {

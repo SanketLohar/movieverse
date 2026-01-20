@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getActorById } from "../../../data/actors/actor.repository";
+import { ActorService } from "../../../data/actors/actor.service";
 import FilmographyClient from "../../../components/FilmographyClient";
 import WatchlistToggle from "../../../components/WatchlistToggle";
 import { buildPersonJsonLd } from "../../../lib/seo/person.schema";
@@ -17,11 +17,10 @@ type Props = {
 
 /* ---------- SEO ---------- */
 
-export async function generateMetadata(
-  { params }: Props
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const actor = await getActorById(id);
+
+  const actor = await ActorService.getActor(id);
 
   if (!actor) {
     return { title: "Actor not found | MovieVerse" };
@@ -37,10 +36,10 @@ export async function generateMetadata(
 
 export default async function ActorPage({ params }: Props) {
   const { id } = await params;
-  const actor = await getActorById(id);
+
+  const actor = await ActorService.getActor(id);
 
   if (!actor) notFound();
-
   const jsonLd = buildPersonJsonLd(actor);
 
   return (
@@ -55,13 +54,14 @@ export default async function ActorPage({ params }: Props) {
 
       <header className="flex flex-col gap-6 sm:flex-row">
         <Image
-          src={actor.profileImage}
-          alt={actor.name.en}
-          width={240}
-          height={320}
-          priority
-          className="rounded-lg object-cover"
-        />
+  src={actor.profileImage}
+  alt={actor.name.en}
+  width={240}
+  height={320}
+  priority
+  sizes="(max-width: 640px) 100vw, 240px"
+  className="rounded-lg object-cover"
+/>
 
         <div className="space-y-4">
           <div className="flex items-center gap-4">

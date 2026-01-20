@@ -2,17 +2,18 @@ import { unstable_cache } from "next/cache";
 import { actorMockData } from "./actor.mock";
 import type { ActorEntity } from "./actor.schema";
 
-export const getActorById = unstable_cache(
-  async (id: string): Promise<ActorEntity | null> => {
-    const actor = actorMockData.find((a) => a.id === id);
-    return actor ?? null;
-  },
-  ["actor-by-id"],
-  {
-    revalidate: 60,
-    tags: ["actor"]
-  }
-);
+export const getActorById = (id: string) =>
+  unstable_cache(
+    async () => {
+      return actorMockData.find(a => a.id === id) ?? null;
+    },
+    [`actor-${id}`],
+    {
+      revalidate: 60,
+      tags: ["actors", `actor-${id}`],
+    }
+  )();
+
 
 export const getAllActors = unstable_cache(
   async (): Promise<ActorEntity[]> => {
@@ -21,6 +22,6 @@ export const getAllActors = unstable_cache(
   ["actors-all"],
   {
     revalidate: 60,
-    tags: ["actors"]
+    tags: ["actors"],
   }
 );

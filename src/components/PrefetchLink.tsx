@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useCallback } from "react";
 
 type Props = {
   href: string;
-  children: ReactNode;
+  children: React.ReactNode;
   className?: string;
 };
 
@@ -17,12 +17,16 @@ export default function PrefetchLink({
 }: Props) {
   const router = useRouter();
 
+  const prefetch = useCallback(() => {
+    router.prefetch(href);
+  }, [href, router]);
+
   return (
     <Link
       href={href}
       className={className}
-      onMouseEnter={() => router.prefetch(href)}
-      onFocus={() => router.prefetch(href)}
+      onMouseEnter={prefetch}
+      onFocus={prefetch}
     >
       {children}
     </Link>

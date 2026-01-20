@@ -6,6 +6,9 @@ import { getMovieById } from "../../../data/movies/movie.repository";
 import MovieCore from "./MovieCore";
 import MovieDescription from "./MovieDescription";
 import MovieMediaSwitcher from "./MovieMediaSwitcher.client";
+import { preloadAdjacentMovies } from "../../../lib/prefetch";
+
+
 
 export const runtime = "edge";
 export const revalidate = 60;
@@ -65,6 +68,8 @@ export default async function MoviePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  await preloadAdjacentMovies(id);
 
   const movie = await getMovieById(id);
 
