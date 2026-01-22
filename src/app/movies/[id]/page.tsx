@@ -8,13 +8,13 @@ import MovieDescription from "./MovieDescription";
 import MovieMediaSwitcher from "./MovieMediaSwitcher.client";
 import { preloadAdjacentMovies } from "../../../lib/prefetch";
 
-
+import ReviewsSection from "../../../components/reviews/ReviewsSection.client";
 
 export const runtime = "edge";
 export const revalidate = 60;
 
 /* ---------------------------------------
-   Phase 5.1–5.3 Metadata
+   Metadata
 ---------------------------------------- */
 
 export async function generateMetadata({
@@ -27,9 +27,7 @@ export async function generateMetadata({
   const movie = await getMovieById(id);
 
   if (!movie) {
-    return {
-      title: "Movie not found | MovieVerse",
-    };
+    return { title: "Movie not found | MovieVerse" };
   }
 
   const url = `https://movieverse.com/movies/${movie.id}`;
@@ -38,15 +36,12 @@ export async function generateMetadata({
     title: `${movie.title} (${movie.year}) | MovieVerse`,
     description: movie.description,
 
-    alternates: {
-      canonical: url,
-    },
+    alternates: { canonical: url },
 
     openGraph: {
       title: `${movie.title} (${movie.year})`,
       description: movie.description,
       url,
-      siteName: "MovieVerse",
       type: "video.movie",
     },
 
@@ -59,7 +54,7 @@ export async function generateMetadata({
 }
 
 /* ---------------------------------------
-   Page with JSON-LD
+   Page
 ---------------------------------------- */
 
 export default async function MoviePage({
@@ -72,12 +67,10 @@ export default async function MoviePage({
   await preloadAdjacentMovies(id);
 
   const movie = await getMovieById(id);
-
   if (!movie) notFound();
 
   const canonicalUrl = `https://movieverse.com/movies/${movie.id}`;
 
-  // ✅ Phase 5.4 — JSON-LD schema
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Movie",
@@ -94,7 +87,6 @@ export default async function MoviePage({
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
-      {/* JSON-LD injected server-side */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -104,7 +96,6 @@ export default async function MoviePage({
 
       <div className="container mx-auto max-w-5xl px-4 py-12">
         <div className="grid gap-12 lg:grid-cols-[1fr_350px]">
-          {/* Main column */}
           <div className="space-y-14">
             <MovieCore movie={movie} />
 
@@ -114,21 +105,17 @@ export default async function MoviePage({
               images={movie.media.stills}
             />
 
-            <Suspense
-              fallback={
-                <div className="h-24 rounded bg-gray-100" />
-              }
-            >
+            <Suspense fallback={<div className="h-24 rounded bg-gray-100" />}>
               <MovieDescription description={movie.description} />
             </Suspense>
+
+            {/* ✅ correct client island */}
+            <ReviewsSection movieId={movie.id} />
           </div>
 
-          {/* Sidebar */}
           <aside className="hidden lg:block">
             <div className="sticky top-8 h-96 rounded-xl border border-dashed bg-gray-50 p-8 text-center text-sm text-gray-400">
               Sidebar Area
-              <br />
-              (Phase 6)
             </div>
           </aside>
         </div>
