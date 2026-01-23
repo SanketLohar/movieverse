@@ -5,11 +5,12 @@ import { ReviewService } from "../../data/reviews/review.service";
 import { sortReviews } from "../../data/reviews/review.ranking";
 import type { ReviewEntity } from "../../data/reviews/review.types";
 import ReviewItem from "./ReviewItem.client";
+import { createReview } from "../../data/reviews/review.repository";
 import { dummyReviews } from "../../data/reviews/review.seed";
 
 type Props = {
   movieId: string;
-  currentUserId: string;
+  currentUserId?: string;
 };
 
 export default function ReviewList({
@@ -26,21 +27,34 @@ export default function ReviewList({
   const [onlyMine, setOnlyMine] = useState(false);
 
   /* ---------------------------------------
-     Load reviews (real + dummy)
+     Initial load + seed hydration
   ---------------------------------------- */
   useEffect(() => {
-    ReviewService.getMovieReviews(movieId).then((real) => {
-      const seeded = dummyReviews.filter(
-        (r) => r.movieId === movieId
-      );
+    async function load() {
+      // 1. load current store
+      const existing =
+        await ReviewService.getMovieReviews(movieId);
 
-      setReviews([
-        ...real,
-        ...seeded.filter(
-          (d) => !real.some((r) => r.id === d.id)
-        ),
-      ]);
-    });
+      // 2. hydrate dummy reviews ONCE
+      dummyReviews
+        .filter((r) => r.movieId === movieId)
+        .forEach((seed) => {
+          if (!existing.some((r) => r.id === seed.id)) {
+            createReview({
+              ...seed,
+              userVotes: seed.userVotes ?? {},
+            });
+          }
+        });
+
+      // 3. read again from single source of truth
+      const final =
+        await ReviewService.getMovieReviews(movieId);
+
+      setReviews(final);
+    }
+
+    load();
   }, [movieId]);
 
   /* ---------------------------------------
@@ -73,18 +87,32 @@ export default function ReviewList({
   }, [filtered, sort]);
 
   /* ---------------------------------------
+     Reload helper
+  ---------------------------------------- */
+  async function reload() {
+    const fresh =
+      await ReviewService.getMovieReviews(movieId);
+    setReviews(fresh);
+  }
+
+  /* ---------------------------------------
      UI
   ---------------------------------------- */
   return (
     <section className="space-y-4">
-      {/* ================= Filters ================= */}
+      {/* Filters */}
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <div>
           <span className="mr-1 text-gray-600">Sort:</span>
           <select
             value={sort}
             onChange={(e) =>
-              setSort(e.target.value as any)
+              setSort(
+                e.target.value as
+                  | "helpful"
+                  | "recent"
+                  | "controversial"
+              )
             }
             className="rounded border px-2 py-1"
           >
@@ -132,60 +160,21 @@ export default function ReviewList({
         </label>
       </div>
 
-      {/* ================= Empty states ================= */}
-      {reviews.length === 0 && (
+      {/* Empty state */}
+      {sorted.length === 0 && (
         <p className="text-sm text-gray-500">
-          No reviews yet. Be the first to review.
+          No reviews found.
         </p>
       )}
 
-      {onlyMine &&
-        filtered.length === 0 &&
-        reviews.length > 0 && (
-          <p className="text-sm text-gray-500">
-            You haven’t posted any review yet.
-          </p>
-        )}
-
-      {!onlyMine &&
-        sorted.length === 0 &&
-        reviews.length > 0 && (
-          <p className="text-sm text-gray-500">
-            No reviews match the selected filters.
-          </p>
-        )}
-
-      {/* ================= Review list ================= */}
+      {/* Review list */}
       <ul className="space-y-4">
         {sorted.map((review) => (
           <ReviewItem
             key={review.id}
             review={review}
             currentUserId={currentUserId}
-            onChange={(deletedId) => {
-              if (deletedId) {
-                setReviews((prev) =>
-                  prev.filter((r) => r.id !== deletedId)
-                );
-                return;
-              }
-
-              ReviewService.getMovieReviews(
-                movieId
-              ).then((real) => {
-                const seeded = dummyReviews.filter(
-                  (r) => r.movieId === movieId
-                );
-
-                setReviews([
-                  ...real,
-                  ...seeded.filter(
-                    (d) =>
-                      !real.some((r) => r.id === d.id)
-                  ),
-                ]);
-              });
-            }}
+            onChange={() => reload()}
           />
         ))}
       </ul>

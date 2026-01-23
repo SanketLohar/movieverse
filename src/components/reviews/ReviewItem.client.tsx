@@ -8,7 +8,7 @@ import { seedUsers } from "../../data/reviews/review.seed";
 
 type Props = {
   review: ReviewEntity;
-  currentUserId: string;
+  currentUserId?: string;
   onChange: (deletedId?: string) => void;
 };
 
@@ -51,11 +51,23 @@ export default function ReviewItem({
   const user = getUser(review.userId);
 
   const [confirm, setConfirm] = useState(false);
-  const [message, setMessage] = useState<string | null>(
-    null
-  );
+  const [message, setMessage] = useState<string | null>(null);
+
+  // ✅ current user's vote
+  const myVote =
+    currentUserId &&
+    review.userVotes[currentUserId];
+
+  /* ---------------------------------------
+     Vote
+  ---------------------------------------- */
 
   async function vote(type: "up" | "down") {
+    if (!currentUserId) {
+      setMessage("Login required to vote.");
+      return;
+    }
+
     try {
       await ReviewService.vote(
         review.id,
@@ -68,25 +80,38 @@ export default function ReviewItem({
     }
   }
 
+  /* ---------------------------------------
+     Delete
+  ---------------------------------------- */
+
   async function remove() {
+    if (!currentUserId) {
+      setMessage("Login required to delete review.");
+      return;
+    }
+
     try {
       await ReviewService.deleteReview(
         review.id,
         currentUserId
       );
-
       onChange(review.id);
     } catch (err) {
       setMessage((err as Error).message);
     }
   }
 
+  /* ---------------------------------------
+     UI
+  ---------------------------------------- */
+
   return (
-    <article className="rounded-lg border bg-white p-4 shadow-sm space-y-3">
+    <article className="space-y-3 rounded-lg border bg-white p-4 shadow-sm">
+      {/* Header */}
       <header className="flex items-start gap-3">
         <Image
           src={user.avatar}
-          alt={user.name}
+          alt={`${user.name} avatar`}
           width={40}
           height={40}
           className="rounded-full object-cover"
@@ -102,7 +127,10 @@ export default function ReviewItem({
             </span>
           </div>
 
-          <div className="text-yellow-500 text-sm">
+          <div
+            className="text-yellow-500 text-sm"
+            aria-label={`Rating ${review.content.rating} out of 5`}
+          >
             {"★".repeat(review.content.rating)}
             {"☆".repeat(
               5 - review.content.rating
@@ -111,29 +139,43 @@ export default function ReviewItem({
         </div>
       </header>
 
+      {/* Review text */}
       <p className="text-sm text-gray-700 leading-relaxed">
         {review.content.text}
       </p>
 
+      {/* Actions */}
       <footer className="flex items-center gap-4 text-sm text-gray-600">
         <button
+          aria-label="Upvote review"
           onClick={() => vote("up")}
-          className="hover:text-black"
+          className={
+            myVote === "up"
+              ? "text-green-600 font-semibold"
+              : "hover:text-black"
+          }
         >
           👍 {review.votes.up}
         </button>
 
         <button
+          aria-label="Downvote review"
           onClick={() => vote("down")}
-          className="hover:text-black"
+          className={
+            myVote === "down"
+              ? "text-red-600 font-semibold"
+              : "hover:text-black"
+          }
         >
           👎 {review.votes.down}
         </button>
 
+        {/* Owner actions */}
         {review.userId === currentUserId && (
           <div className="ml-auto">
             {!confirm ? (
               <button
+                aria-label="Delete review"
                 onClick={() => setConfirm(true)}
                 className="text-red-600 hover:underline"
               >
@@ -144,14 +186,20 @@ export default function ReviewItem({
                 <span className="text-xs">
                   Delete review?
                 </span>
+
                 <button
+                  aria-label="Confirm delete review"
                   onClick={remove}
                   className="text-red-600"
                 >
                   Yes
                 </button>
+
                 <button
-                  onClick={() => setConfirm(false)}
+                  aria-label="Cancel delete review"
+                  onClick={() =>
+                    setConfirm(false)
+                  }
                 >
                   Cancel
                 </button>
@@ -161,8 +209,12 @@ export default function ReviewItem({
         )}
       </footer>
 
+      {/* Status message */}
       {message && (
-        <p className="text-xs text-green-600">
+        <p
+          className="text-xs text-green-600"
+          role="status"
+        >
           {message}
         </p>
       )}

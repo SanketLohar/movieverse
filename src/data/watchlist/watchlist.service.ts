@@ -153,7 +153,42 @@ class WatchlistService {
     }
   }
 
-  private applyIncoming(item: WatchlistItem, source: MutationSource) {
+  /* ---------------- clear all ---------------- */
+
+  async clear() {
+    const items = Array.from(this.cache.values());
+
+    // optimistic UI
+    this.cache.clear();
+    this.emit();
+
+    // broadcast removals
+    items.forEach((item) => {
+      this.broadcast({
+        ...item,
+        deleted: true,
+        updatedAt: Date.now(),
+        version: item.version + 1,
+      });
+    });
+
+    try {
+      await this.repo.clear();
+    } catch {
+      // rollback
+      items.forEach((item) => {
+        this.cache.set(item.id, item);
+      });
+      this.emit();
+    }
+  }
+
+  /* ---------------- remote sync ---------------- */
+
+  private applyIncoming(
+    item: WatchlistItem,
+    source: MutationSource
+  ) {
     const existing = this.cache.get(item.id);
 
     if (!this.shouldApply(item, existing, source)) return;

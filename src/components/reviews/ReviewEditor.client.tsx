@@ -7,18 +7,21 @@ import {
   saveDraft,
   deleteDraft,
 } from "../../data/reviews/review.draft.repository";
+import { useAuth } from "../../auth/useAuth";
+import { canPerformAction } from "../../lib/rateLimiter";
 
 type Props = {
   movieId: string;
-  userId: string;
   onSubmitted: () => void;
 };
 
 export default function ReviewEditor({
   movieId,
-  userId,
   onSubmitted,
 }: Props) {
+  const { session } = useAuth();
+  const userId = session?.user.id ?? null;
+
   const [text, setText] = useState("");
   const [rating, setRating] = useState(5);
   const [loading, setLoading] = useState(false);
@@ -26,8 +29,13 @@ export default function ReviewEditor({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  /* Restore draft */
+  /* ---------------------------------------
+     Restore draft
+  ---------------------------------------- */
+
   useEffect(() => {
+    if (!userId) return;
+
     getDraft(movieId, userId).then((draft) => {
       if (!draft) return;
       setText(draft.text);
@@ -35,8 +43,13 @@ export default function ReviewEditor({
     });
   }, [movieId, userId]);
 
-  /* Autosave */
+  /* ---------------------------------------
+     Autosave
+  ---------------------------------------- */
+
   useEffect(() => {
+    if (!userId) return;
+
     const t = setTimeout(() => {
       saveDraft({
         movieId,
@@ -45,18 +58,30 @@ export default function ReviewEditor({
         rating,
         savedAt: Date.now(),
       });
-    }, 400);
+    }, 600);
 
     return () => clearTimeout(t);
   }, [text, rating, movieId, userId]);
 
+  /* ---------------------------------------
+     Submit (rate limit here ONLY)
+  ---------------------------------------- */
+
   async function submit() {
+    if (!userId) return;
+
+    if (!canPerformAction()) {
+      setError("Too many actions. Please wait.");
+      return;
+    }
+
     setError(null);
     setSuccess(null);
 
-    const words = text.trim().split(/\s+/);
+    const trimmed = text.trim();
+    const words = trimmed.split(/\s+/);
 
-    if (words.length < 2 || text.trim().length < 10) {
+    if (words.length < 2 || trimmed.length < 10) {
       setError(
         "Review must contain at least 2 words and 10 characters."
       );
@@ -69,7 +94,7 @@ export default function ReviewEditor({
       await ReviewService.submitReview({
         movieId,
         userId,
-        text,
+        text: trimmed,
         rating,
         savedAt: Date.now(),
       });
@@ -88,6 +113,18 @@ export default function ReviewEditor({
     }
   }
 
+  /* ---------------------------------------
+     Render
+  ---------------------------------------- */
+
+  if (!session) {
+    return (
+      <div className="rounded border p-4 text-sm text-gray-600">
+        Login required to write a review.
+      </div>
+    );
+  }
+
   return (
     <section className="space-y-3 rounded-lg border p-4">
       <h3 className="font-semibold">Write a review</h3>
@@ -101,9 +138,7 @@ export default function ReviewEditor({
       />
 
       {error && (
-        <p className="text-sm text-red-600">
-          {error}
-        </p>
+        <p className="text-sm text-red-600">{error}</p>
       )}
 
       {success && (

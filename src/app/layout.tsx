@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { QueryProvider } from "./providers";
+
 import Header from "../components/Header";
 import WatchlistHydrator from "../components/WatchlistHydrator";
 import { WatchlistUndoProvider } from "../components/WatchlistUndoProvider";
+import { AuthProvider } from "../auth/auth.context";
 
 export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3000"),
@@ -61,12 +64,22 @@ export default function RootLayout({
   return (
     <html lang="en" className="antialiased">
       <body className="flex min-h-screen flex-col bg-white text-gray-900">
+        {/* Hydrates watchlist from localStorage */}
         <WatchlistHydrator />
 
-        <WatchlistUndoProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-        </WatchlistUndoProvider>
+        {/* Global providers */}
+        <AuthProvider>
+          <QueryProvider>
+          <WatchlistUndoProvider>
+            <Header />
+<main className="flex-1 bg-gray-50">
+  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    {children}
+  </div>
+</main>
+          </WatchlistUndoProvider>
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

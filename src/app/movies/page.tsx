@@ -8,7 +8,7 @@ export default async function MoviesPage() {
   const movies = await getAllMovies();
 
   return (
-    <section className="space-y-6 py-6">
+    <section className="space-y-10 py-10 sm:py-14">
       <header>
         <h1 className="text-2xl font-bold">Movies</h1>
         <p className="text-sm text-gray-600">

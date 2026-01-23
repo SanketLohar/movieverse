@@ -5,13 +5,25 @@ export const revalidate = 3600;
 async function SimilarContent() {
   await new Promise((res) => setTimeout(res, 300));
 
+  const similarActors: string[] = [];
+
+  if (similarActors.length === 0) {
+    return (
+      <section className="rounded-lg border p-4 text-sm text-gray-500">
+        No similar actors found.
+      </section>
+    );
+  }
+
   return (
     <section className="rounded-lg border p-4">
-      <h2 className="mb-2 font-semibold">Similar Actors</h2>
+      <h2 className="mb-2 font-semibold">
+        Similar Actors
+      </h2>
       <ul className="list-disc pl-4 text-sm">
-        <li>Actor A</li>
-        <li>Actor B</li>
-        <li>Actor C</li>
+        {similarActors.map((actor) => (
+          <li key={actor}>{actor}</li>
+        ))}
       </ul>
     </section>
   );

@@ -17,10 +17,7 @@ export class IndexedDBWatchlistRepository
       const req = store.getAll();
 
       req.onsuccess = () => {
-        const items = (req.result ?? []).filter(
-          (item) => !item.deleted
-        );
-        resolve(items);
+        resolve((req.result ?? []).filter((i) => !i.deleted));
       };
 
       req.onerror = () => reject(req.error);
@@ -45,8 +42,7 @@ export class IndexedDBWatchlistRepository
 
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, "readwrite");
-      const store = tx.objectStore(STORE_NAME);
-      store.put(item);
+      tx.objectStore(STORE_NAME).put(item);
 
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
@@ -61,6 +57,7 @@ export class IndexedDBWatchlistRepository
       const store = tx.objectStore(STORE_NAME);
 
       const req = store.get(id);
+
       req.onsuccess = () => {
         const item = req.result;
         if (!item) return resolve();
@@ -71,6 +68,20 @@ export class IndexedDBWatchlistRepository
 
         store.put(item);
       };
+
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  /* ✅ REQUIRED FOR clear() */
+
+  async clear(): Promise<void> {
+    const db = await openWatchlistDB();
+
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      tx.objectStore(STORE_NAME).clear();
 
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);

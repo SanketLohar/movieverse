@@ -1,3 +1,26 @@
+/* ---------------------------------------
+   Movie listing types (Phase 5.4.8)
+---------------------------------------- */
+
+export type Movie = {
+  id: string;
+  title: string;
+  poster: string | null;
+  overview: string;
+  releaseDate: string;
+  rating: number;
+};
+
+export type MoviePage = {
+  page: number;
+  totalPages: number;
+  results: Movie[];
+};
+
+/* ---------------------------------------
+   Movie detail bundle types (existing)
+---------------------------------------- */
+
 export type MovieCredit = {
   id: string;
   name: string;

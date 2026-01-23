@@ -3,7 +3,7 @@ import type { ReviewEntity } from "./review.types";
 const STORAGE_KEY = "movieverse:reviews";
 
 /* ---------------------------------------
-   Persistence helpers
+   Load + migrate
 ---------------------------------------- */
 
 function load(): ReviewEntity[] {
@@ -11,7 +11,15 @@ function load(): ReviewEntity[] {
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as ReviewEntity[];
+
+    // ✅ MIGRATION: add userVotes if missing
+    return parsed.map((r) => ({
+      ...r,
+      userVotes: r.userVotes ?? {},
+    }));
   } catch {
     return [];
   }
@@ -19,11 +27,14 @@ function load(): ReviewEntity[] {
 
 function save(data: ReviewEntity[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
 }
 
 /* ---------------------------------------
-   In-memory cache
+   In-memory store
 ---------------------------------------- */
 
 let reviewStore: ReviewEntity[] = load();
@@ -32,14 +43,11 @@ let reviewStore: ReviewEntity[] = load();
    Queries
 ---------------------------------------- */
 
-export function getReviewsByMovie(
-  movieId: string
-): ReviewEntity[] {
+export function getReviewsByMovie(movieId: string) {
   return reviewStore.filter(
     (r) =>
       r.movieId === movieId &&
-      r.deletedAt === null &&
-      !r.moderation.isHidden
+      r.deletedAt === null
   );
 }
 
@@ -63,31 +71,30 @@ export function getReviewById(id: string) {
    Mutations
 ---------------------------------------- */
 
-export function createReview(
-  review: ReviewEntity
-) {
-  reviewStore.unshift(review);
+export function createReview(review: ReviewEntity) {
+  reviewStore.unshift({
+    ...review,
+    userVotes: review.userVotes ?? {},
+  });
+
   save(reviewStore);
   return review;
 }
 
-export function softDeleteReview(
-  id: string
-) {
-  const review = reviewStore.find(
-    (r) => r.id === id
+export function softDeleteReview(id: string) {
+  const r = reviewStore.find(
+    (x) => x.id === id
   );
+  if (!r) return;
 
-  if (!review) return;
-
-  review.deletedAt = Date.now();
-  review.updatedAt = Date.now();
-
+  r.deletedAt = Date.now();
+  r.updatedAt = Date.now();
   save(reviewStore);
 }
 
 export function voteReview(
   id: string,
+  userId: string,
   type: "up" | "down"
 ) {
   const review = reviewStore.find(
@@ -98,6 +105,22 @@ export function voteReview(
 
   if (!review) return;
 
+  // ✅ safety guarantee
+  review.userVotes ??= {};
+
+  const previous =
+    review.userVotes[userId];
+
+  if (previous === "up") review.votes.up--;
+  if (previous === "down") review.votes.down--;
+
+  if (previous === type) {
+    delete review.userVotes[userId];
+    save(reviewStore);
+    return;
+  }
+
+  review.userVotes[userId] = type;
   review.votes[type]++;
   save(reviewStore);
 }

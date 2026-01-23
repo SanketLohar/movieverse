@@ -1,8 +1,9 @@
 import Link from "next/link";
+import MovieListClient from "../components/movies/MovieList.client";
 
 export default function HomePage() {
   return (
-    <section className="space-y-8 py-10 sm:py-14">
+    <section className="space-y-10 py-10 sm:py-14">
       {/* Hero */}
       <div className="space-y-4">
         <h1

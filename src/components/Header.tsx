@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import LoginButton from "./auth/LoginButton";
 
 export default function Header() {
   return (
@@ -13,6 +14,8 @@ export default function Header() {
         <Link href="/movies">Movies</Link>
         <Link href="/actor">Actors</Link>
         <Link href="/watchlist">Watchlist</Link>
+        <LoginButton />
+
       </div>
       
     </header>

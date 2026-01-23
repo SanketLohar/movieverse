@@ -3,19 +3,24 @@
 import { useState } from "react";
 import ReviewEditor from "./ReviewEditor.client";
 import ReviewList from "./ReviewList.client";
+import { useAuth } from "../../auth/useAuth";
 
 export default function ReviewsSection({
-  movieId
+  movieId,
 }: {
   movieId: string;
 }) {
+  const { session } = useAuth();
+
+  // ✅ undefined when not logged in
+  const userId = session?.user.id;
+
   const [key, setKey] = useState(0);
 
   return (
     <section className="space-y-6 border-t pt-10">
       <ReviewEditor
         movieId={movieId}
-        userId="u1"
         onSubmitted={() =>
           setKey((k) => k + 1)
         }
@@ -24,7 +29,7 @@ export default function ReviewsSection({
       <ReviewList
         key={key}
         movieId={movieId}
-        currentUserId="u1"
+        currentUserId={userId}
       />
     </section>
   );

@@ -8,7 +8,7 @@ export default function ActorsPage() {
   const lang = "en";
 
   return (
-    <section className="space-y-6 py-8">
+    <section className="space-y-10 py-10 sm:py-14">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           Actors

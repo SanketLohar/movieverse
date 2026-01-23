@@ -14,9 +14,7 @@ type ResolvedItem = {
 };
 
 export default function WatchlistPage() {
-  const [items, setItems] = useState<ResolvedItem[]>(
-    []
-  );
+  const [items, setItems] = useState<ResolvedItem[]>([]);
   const [ready, setReady] = useState(
     watchlistService.isReady()
   );
@@ -30,7 +28,6 @@ export default function WatchlistPage() {
           const movie = movies.find(
             (m) => m.id === item.id
           );
-
           if (!movie) return null;
 
           return {
@@ -44,7 +41,6 @@ export default function WatchlistPage() {
           const actor = actors.find(
             (a) => a.id === item.id
           );
-
           if (!actor) return null;
 
           return {
@@ -62,7 +58,6 @@ export default function WatchlistPage() {
   useEffect(() => {
     const sync = () => {
       setReady(watchlistService.isReady());
-
       const raw = watchlistService.getAll();
       setItems(resolveItems(raw));
     };
@@ -87,32 +82,44 @@ export default function WatchlistPage() {
 
   if (items.length === 0) {
     return (
-      <p className="py-8 text-gray-600">
-        Your watchlist is empty.
-      </p>
+      <div className="rounded-xl border bg-white p-8 text-center text-sm text-gray-500">
+        Your watchlist is empty.  
+        Start exploring movies and actors to add them here.
+      </div>
     );
   }
 
   return (
-    <section className="py-8 space-y-4">
+    <section className="space-y-8 py-6">
       <h1 className="text-2xl font-bold">
         Your Watchlist
       </h1>
 
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {items.map((item) => (
           <li
             key={item.id}
-            className="rounded border p-3"
+            className="flex items-center justify-between rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition"
           >
-            <div className="font-semibold">
-              {item.title}
+            <div>
+              <p className="font-semibold">
+                {item.title}
+              </p>
+              <p className="text-xs text-gray-500">
+                {item.type === "movie"
+                  ? "Movie"
+                  : "Actor"}
+              </p>
             </div>
 
-            {/* <div className="text-xs text-gray-400">
-  {item.type === "movie" ? "Movie" : "Actor"}
-</div> */}
-
+            <button
+              onClick={() =>
+                watchlistService.remove(item.id)
+              }
+              className="text-sm text-red-600 hover:underline"
+            >
+              Remove
+            </button>
           </li>
         ))}
       </ul>

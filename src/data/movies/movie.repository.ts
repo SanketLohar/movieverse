@@ -5,7 +5,7 @@ import type {
   MovieCredit,
   MovieReview,
 } from "./movie.types";
-
+import { fetchPopularMovies } from "./movie.api";
 /* --------------------------------
    Cache configuration
 -------------------------------- */
@@ -242,4 +242,22 @@ async function refreshBundle(movieId: string) {
   } catch {
     // background failure ignored
   }
+}
+export async function getPopularMovies(page: number) {
+  const data = await fetchPopularMovies(page);
+
+  return {
+    page: data.page,
+    totalPages: data.total_pages,
+    results: data.results.map((m: any) => ({
+      id: String(m.id),
+      title: m.title,
+      overview: m.overview,
+      poster: m.poster_path
+        ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
+        : null,
+      rating: m.vote_average,
+      releaseDate: m.release_date,
+    })),
+  };
 }

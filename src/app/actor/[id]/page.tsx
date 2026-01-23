@@ -43,7 +43,7 @@ export default async function ActorPage({ params }: Props) {
   const jsonLd = buildPersonJsonLd(actor);
 
   return (
-    <section className="space-y-10 py-8">
+    <section className="space-y-10 py-10 sm:py-14">
       {/* JSON-LD */}
       <script
         type="application/ld+json"
