@@ -1,10 +1,12 @@
+type Props = {
+  description: string;
+};
+
 export default function MovieDescription({
   description,
-}: {
-  description: string;
-}) {
+}: Props) {
   return (
-    <p className="max-w-2xl">
+<p className="text-gray-700 leading-relaxed text-sm sm:text-base">
       {description}
     </p>
   );

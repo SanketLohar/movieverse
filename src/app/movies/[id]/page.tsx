@@ -6,9 +6,8 @@ import { getMovieById } from "../../../data/movies/movie.repository";
 import MovieCore from "./MovieCore";
 import MovieDescription from "./MovieDescription";
 import MovieMediaSwitcher from "./MovieMediaSwitcher.client";
-import { preloadAdjacentMovies } from "../../../lib/prefetch";
-
 import ReviewsSection from "../../../components/reviews/ReviewsSection.client";
+import { preloadAdjacentMovies } from "../../../lib/prefetch";
 
 export const runtime = "edge";
 export const revalidate = 60;
@@ -35,7 +34,6 @@ export async function generateMetadata({
   return {
     title: `${movie.title} (${movie.year}) | MovieVerse`,
     description: movie.description,
-
     alternates: { canonical: url },
 
     openGraph: {
@@ -69,55 +67,39 @@ export default async function MoviePage({
   const movie = await getMovieById(id);
   if (!movie) notFound();
 
-  const canonicalUrl = `https://movieverse.com/movies/${movie.id}`;
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Movie",
-    name: movie.title,
-    description: movie.description,
-    datePublished: String(movie.year),
-    url: canonicalUrl,
-    trailer: {
-      "@type": "VideoObject",
-      name: `${movie.title} Official Trailer`,
-      embedUrl: `https://www.youtube.com/embed/${movie.media.trailer}`,
-    },
-  };
-
   return (
-    <main className="min-h-screen bg-white text-gray-900">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd),
-        }}
-      />
-
-      <div className="container mx-auto max-w-5xl px-4 py-12">
-        <div className="grid gap-12 lg:grid-cols-[1fr_350px]">
-          <div className="space-y-14">
+    <main className="min-h-screen bg-gray-50 text-gray-900">
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        <div className="space-y-14">
+          {/* Core */}
+          <section className="rounded-2xl bg-white p-5 shadow-sm">
             <MovieCore movie={movie} />
+          </section>
 
+          {/* Media */}
+          <section className="rounded-2xl bg-white p-5 shadow-sm">
             <MovieMediaSwitcher
               title={movie.title}
               trailerId={movie.media.trailer}
               images={movie.media.stills}
             />
+          </section>
 
-            <Suspense fallback={<div className="h-24 rounded bg-gray-100" />}>
+          {/* Description */}
+          <section className="rounded-2xl bg-white p-5 shadow-sm">
+            <Suspense
+              fallback={
+                <div className="h-24 animate-pulse rounded bg-gray-100" />
+              }
+            >
               <MovieDescription description={movie.description} />
             </Suspense>
+          </section>
 
-            {/* ✅ correct client island */}
+          {/* Reviews */}
+          <section className="rounded-2xl bg-white p-5 shadow-sm">
             <ReviewsSection movieId={movie.id} />
-          </div>
-
-          <aside className="hidden lg:block">
-            <div className="sticky top-8 h-96 rounded-xl border border-dashed bg-gray-50 p-8 text-center text-sm text-gray-400">
-              Sidebar Area
-            </div>
-          </aside>
+          </section>
         </div>
       </div>
     </main>

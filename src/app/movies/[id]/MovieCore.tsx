@@ -12,32 +12,33 @@ export default function MovieCore({
   return (
     <header className="space-y-6">
       <div className="flex flex-col gap-6 sm:flex-row">
-        {/* ✅ Hero image (LCP element) */}
+        {/* Image */}
         <Image
           src={heroImage}
           alt={movie.title}
-          width={320}
-          height={180}
+          width={480}
+          height={270}
           priority
-          sizes="(max-width: 640px) 100vw, 320px"
-          className="rounded-xl object-cover"
+          sizes="(max-width: 640px) 100vw, 480px"
+          className="w-full rounded-xl object-cover"
         />
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold">
-              {movie.title}
-            </h1>
+        {/* Text */}
+        <div className="flex flex-col gap-3 w-full">
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {movie.title}
+          </h1>
 
+          <p className="text-gray-600">
+            Release Year: {movie.year}
+          </p>
+
+          <div className="pt-2">
             <WatchlistToggle
               id={movie.id}
               type="movie"
             />
           </div>
-
-          <p className="text-gray-600">
-            Release Year: {movie.year}
-          </p>
         </div>
       </div>
     </header>

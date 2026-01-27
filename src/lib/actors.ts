@@ -26,27 +26,28 @@ export const actors: Actor[] = [
       en: "Leonardo DiCaprio",
       hi: "लियोनार्डो डिकैप्रियो",
     },
+
     bio: {
-  en: "UPDATED FROM SERVER AT " + Date.now(),
-},
+      en: "Leonardo DiCaprio is an American actor and film producer known for his work in biographical and period films. He has received numerous accolades, including an Academy Award, a British Academy Film Award, and three Golden Globe Awards.",
+    },
 
-    profileImage: "/actors/leonardo.jpg", // ✅ LOCAL IMAGE
+    profileImage: "/actor/leonardo.jpg",
+
     filmography: [
-  {
-    id: "m1",
-    title: { en: "Inception", hi: "इन्सेप्शन" },
-    year: 2010,
-    role: { en: "Cobb", hi: "कॉब" },
-    genre: ["Sci-Fi", "Thriller"],
-  },
-  {
-    id: "m2",
-    title: { en: "Titanic", hi: "टाइटैनिक" },
-    year: 1997,
-    role: { en: "Jack Dawson", hi: "जैक डॉसन" },
-    genre: ["Romance", "Drama"],
-  },
-],
-
+      {
+        id: "m1",
+        title: { en: "Inception", hi: "इन्सेप्शन" },
+        year: 2010,
+        role: { en: "Cobb", hi: "कॉब" },
+        genre: ["Sci-Fi", "Thriller"],
+      },
+      {
+        id: "m2",
+        title: { en: "Titanic", hi: "टाइटैनिक" },
+        year: 1997,
+        role: { en: "Jack Dawson", hi: "जैक डॉसन" },
+        genre: ["Romance", "Drama"],
+      },
+    ],
   },
 ];

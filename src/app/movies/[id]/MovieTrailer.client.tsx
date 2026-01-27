@@ -7,7 +7,10 @@ type Props = {
   title: string;
 };
 
-export default function MovieTrailer({ youtubeId, title }: Props) {
+export default function MovieTrailer({
+  youtubeId,
+  title,
+}: Props) {
   const [activated, setActivated] = useState(false);
 
   return (
@@ -17,27 +20,27 @@ export default function MovieTrailer({ youtubeId, title }: Props) {
           type="button"
           onClick={() => setActivated(true)}
           className="group absolute inset-0 flex items-center justify-center"
-          aria-label="Play trailer"
+          aria-label={`Play trailer for ${title}`}
         >
-          {/* thumbnail */}
+          {/* Thumbnail */}
           <img
             src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
             alt={`${title} trailer preview`}
             className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
           />
 
-          {/* play button */}
-          <div className="absolute flex h-20 w-20 items-center justify-center rounded-full bg-black/70 text-white text-3xl">
+          {/* Play icon */}
+          <span className="absolute flex h-20 w-20 items-center justify-center rounded-full bg-black/70 text-white text-3xl">
             ▶
-          </div>
+          </span>
         </button>
       ) : (
         <iframe
-          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
-          title={title}
-          className="absolute inset-0 h-full w-full"
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`}
+          title={`${title} trailer`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
+          className="absolute inset-0 h-full w-full rounded-xl"
         />
       )}
     </div>

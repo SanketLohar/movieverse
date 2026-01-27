@@ -1,28 +1,46 @@
 import { z } from "zod";
 
-/**
- * Localized string (i18n-ready)
- */
+/* ---------------------------------------
+   Localized text (i18n ready)
+---------------------------------------- */
+
 export const LocalizedTextSchema = z.object({
-  en: z.string()
+  en: z.string(),
+  hi: z.string().optional(),
 });
 
-export type LocalizedText = z.infer<typeof LocalizedTextSchema>;
+export type LocalizedText = z.infer<
+  typeof LocalizedTextSchema
+>;
+
+/* ---------------------------------------
+   Filmography item
+---------------------------------------- */
 
 export const FilmographyItemSchema = z.object({
   id: z.string(),
   title: LocalizedTextSchema,
   year: z.number(),
   role: LocalizedTextSchema,
-  genre: z.array(z.string())
+  genre: z.array(z.string()),
 });
+
+export type FilmographyItem = z.infer<
+  typeof FilmographyItemSchema
+>;
+
+/* ---------------------------------------
+   Actor entity
+---------------------------------------- */
 
 export const ActorSchema = z.object({
   id: z.string(),
   name: LocalizedTextSchema,
   bio: LocalizedTextSchema,
   profileImage: z.string(),
-  filmography: z.array(FilmographyItemSchema)
+  filmography: z.array(FilmographyItemSchema),
 });
 
-export type ActorEntity = z.infer<typeof ActorSchema>;
+export type ActorEntity = z.infer<
+  typeof ActorSchema
+>;

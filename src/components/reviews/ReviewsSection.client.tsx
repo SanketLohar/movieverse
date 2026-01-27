@@ -5,29 +5,29 @@ import ReviewEditor from "./ReviewEditor.client";
 import ReviewList from "./ReviewList.client";
 import { useAuth } from "../../auth/useAuth";
 
+type Props = {
+  movieId: string;
+};
+
 export default function ReviewsSection({
   movieId,
-}: {
-  movieId: string;
-}) {
+}: Props) {
   const { session } = useAuth();
-
-  // ✅ undefined when not logged in
   const userId = session?.user.id;
 
-  const [key, setKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
-    <section className="space-y-6 border-t pt-10">
+    <section className="space-y-6">
       <ReviewEditor
         movieId={movieId}
         onSubmitted={() =>
-          setKey((k) => k + 1)
+          setRefreshKey((k) => k + 1)
         }
       />
 
       <ReviewList
-        key={key}
+        key={refreshKey}
         movieId={movieId}
         currentUserId={userId}
       />

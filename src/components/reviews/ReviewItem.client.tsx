@@ -106,118 +106,94 @@ export default function ReviewItem({
   ---------------------------------------- */
 
   return (
-    <article className="space-y-3 rounded-lg border bg-white p-4 shadow-sm">
-      {/* Header */}
-      <header className="flex items-start gap-3">
-        <Image
-          src={user.avatar}
-          alt={`${user.name} avatar`}
-          width={40}
-          height={40}
-          className="rounded-full object-cover"
-        />
+  <article className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md">
+    {/* Header */}
+    <header className="flex items-start gap-4">
+      <Image
+        src={user.avatar}
+        alt={user.name}
+        width={44}
+        height={44}
+        className="rounded-full object-cover border"
+      />
 
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <strong className="text-sm">
-              {user.name}
-            </strong>
-            <span className="text-xs text-gray-500">
-              {timeAgo(review.createdAt)}
-            </span>
-          </div>
+      <div className="flex-1">
+        <div className="flex items-center justify-between">
+          <strong className="text-sm font-semibold text-gray-900">
+            {user.name}
+          </strong>
 
-          <div
-            className="text-yellow-500 text-sm"
-            aria-label={`Rating ${review.content.rating} out of 5`}
-          >
-            {"★".repeat(review.content.rating)}
-            {"☆".repeat(
-              5 - review.content.rating
-            )}
-          </div>
+          <span className="text-xs text-gray-500">
+            {timeAgo(review.createdAt)}
+          </span>
         </div>
-      </header>
 
-      {/* Review text */}
-      <p className="text-sm text-gray-700 leading-relaxed">
-        {review.content.text}
-      </p>
+        {/* Rating */}
+        <div className="mt-1 flex items-center gap-1 text-sm text-yellow-500">
+          {"★".repeat(review.content.rating)}
+          <span className="ml-2 text-xs text-gray-500">
+            {review.content.rating}/5
+          </span>
+        </div>
+      </div>
+    </header>
 
-      {/* Actions */}
-      <footer className="flex items-center gap-4 text-sm text-gray-600">
+    {/* Content */}
+    <p className="mt-4 text-sm leading-relaxed text-gray-700">
+      {review.content.text}
+    </p>
+
+    {/* Footer */}
+    <footer className="mt-4 flex items-center justify-between text-sm">
+      <div className="flex items-center gap-4">
         <button
-          aria-label="Upvote review"
           onClick={() => vote("up")}
-          className={
-            myVote === "up"
-              ? "text-green-600 font-semibold"
-              : "hover:text-black"
-          }
+          className="flex items-center gap-1 rounded-md px-2 py-1 hover:bg-gray-100"
         >
-          👍 {review.votes.up}
+          👍 <span>{review.votes.up}</span>
         </button>
 
         <button
-          aria-label="Downvote review"
           onClick={() => vote("down")}
-          className={
-            myVote === "down"
-              ? "text-red-600 font-semibold"
-              : "hover:text-black"
-          }
+          className="flex items-center gap-1 rounded-md px-2 py-1 hover:bg-gray-100"
         >
-          👎 {review.votes.down}
+          👎 <span>{review.votes.down}</span>
         </button>
+      </div>
 
-        {/* Owner actions */}
-        {review.userId === currentUserId && (
-          <div className="ml-auto">
-            {!confirm ? (
+      {review.userId === currentUserId && (
+        <div>
+          {!confirm ? (
+            <button
+              onClick={() => setConfirm(true)}
+              className="text-xs text-red-600 hover:underline"
+            >
+              Delete
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 text-xs">
+              <span>Delete?</span>
               <button
-                aria-label="Delete review"
-                onClick={() => setConfirm(true)}
-                className="text-red-600 hover:underline"
+                onClick={remove}
+                className="text-red-600"
               >
-                Delete
+                Yes
               </button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-xs">
-                  Delete review?
-                </span>
-
-                <button
-                  aria-label="Confirm delete review"
-                  onClick={remove}
-                  className="text-red-600"
-                >
-                  Yes
-                </button>
-
-                <button
-                  aria-label="Cancel delete review"
-                  onClick={() =>
-                    setConfirm(false)
-                  }
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </footer>
-
-      {/* Status message */}
-      {message && (
-        <p
-          className="text-xs text-green-600"
-          role="status"
-        >
-          {message}
-        </p>
+              <button onClick={() => setConfirm(false)}>
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       )}
-    </article>
-  );
+    </footer>
+
+    {message && (
+      <p className="mt-2 text-xs text-red-500">
+        {message}
+      </p>
+    )}
+  </article>
+);
+
 }
